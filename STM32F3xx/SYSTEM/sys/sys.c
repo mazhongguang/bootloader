@@ -86,7 +86,8 @@ void assert_failed(uint8_t* file, uint32_t line)
 
 //THUMB指令不支持汇编内联
 //采用如下方法实现执行汇编指令WFI 
-#if defined (__GNUC__)
+//#if defined(__ARMCLIB_VERSION) /* KEIL */
+//#if defined(__GNUC__) && (__GNUC__ > 4) /* KEIL */
 void WFI_SET(void)
 {
 	__ASM volatile("wfi");		  
@@ -105,32 +106,33 @@ void INTX_ENABLE(void)
 //addr:栈顶地址
 void MSR_MSP(u32 addr) 
 {
-   __ASM volatile("MSR MSP, r0"); 			//set Main Stack value
-   __ASM volatile("BX r14");
+		("MSR MSP, r0"); 			//set Main Stack value
+		("BX r14");						
 }
+//#else /* LINUX */
+//__asm void WFI_SET(void)
+//{
+//	WFI;		  
+//}
+////关闭所有中断(但是不包括fault和NMI中断)
+//__asm void INTX_DISABLE(void)
+//{
+//	CPSID   I
+//	BX      LR	  
+//}
+////开启所有中断
+//__asm void INTX_ENABLE(void)
+//{
+//	CPSIE   I
+//	BX      LR  
+//}
+////设置栈顶地址
+////addr:栈顶地址
+//__asm void MSR_MSP(u32 addr) 
+//{
+//	MSR MSP, r0			//set Main Stack value
+//	BX r14
+//}
 
-#else
-__asm void WFI_SET(void)
-{
-	WFI;		  
-}
-//关闭所有中断(但是不包括fault和NMI中断)
-__asm void INTX_DISABLE(void)
-{
-	CPSID   I
-	BX      LR	  
-}
-//开启所有中断
-__asm void INTX_ENABLE(void)
-{
-	CPSIE   I
-	BX      LR  
-}
-//设置栈顶地址
-//addr:栈顶地址
-__asm void MSR_MSP(u32 addr) 
-{
-	MSR MSP, r0			//set Main Stack value
-	BX r14
-}
-#endif /* end __GUNC__ */
+
+//#endif /* end __ARMCLIB_VERSION */

@@ -15,7 +15,7 @@ int main(void)
 	uint16_t oldcnt = 0;
 	uint16_t applenth = 0;
 	
-	/*SCB->VTOR = FLASH_BASE | 0x3000;*/
+	SCB->VTOR = FLASH_BASE | 0x3000;
 	
 	HAL_Init();
 	Stm32_Clock_Init(RCC_PLL_MUL9);
@@ -23,19 +23,16 @@ int main(void)
 	uart_init(115200);
 	led_init();
 	button_init();
-	
-	#if 0
+	printf("1111111111\r\n");
+	#if 1
 	while(1)
 	{
-		LL_USART_TransmitData8(USART1, 0x35);
 		printf("APP程序运行中...\r\n");
-		printf("13487897\r\n");
-		fflush(stdout);
 		delay_ms(1000);
 	}
 	#endif
 	
-#if 1
+#if 0
 	while (1)
   {
 		if (USART_RX_CNT)
@@ -46,6 +43,7 @@ int main(void)
 				oldcnt = 0;
 				USART_RX_CNT = 0;
 				printf("用户程序接收完成！\r\n");
+				
 				printf("代码长度： %d Bytes\r\n", applenth);
 			}
 			else
@@ -99,7 +97,7 @@ int main(void)
 			}
 			else
 			{
-				printf("非FLASH应用程序，无法执行");
+				printf("非FLASH应用程序，无法执行！\r\n");
 			}
 		}
   }

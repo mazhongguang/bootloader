@@ -24,7 +24,29 @@
 ////////////////////////////////////////////////////////////////////////////////// 	  
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 //#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)	
-#if defined (__GNUC__)
+#if defined (__ARMCLIB_VERSION)  /* KEIL */
+#pragma import(__use_no_semihosting)             
+//标准库需要的支持函数                 
+struct __FILE 
+{ 
+	int handle; 
+}; 
+
+FILE __stdout;       
+//定义_sys_exit()以避免使用半主机模式    
+void _sys_exit(int x) 
+{ 
+	x = x; 
+} 
+//重定义fputc函数 
+int fputc(int ch, FILE *f)
+{ 	
+	while((USART1->ISR&0X40)==0);//循环发送,直到发送完毕   
+	USART1->TDR = (u8) ch;  
+//		LL_USART_TransmitData8(USART1, ch);
+	return ch;
+}
+#else
 int __write(int fd, char *pBuffer, int size)
 {
 	int i = 0;
@@ -55,28 +77,6 @@ int __write(int fd, char *pBuffer, int size)
 	/*return size;*/
 }
 
-#else
-#pragma import(__use_no_semihosting)             
-//标准库需要的支持函数                 
-struct __FILE 
-{ 
-	int handle; 
-}; 
-
-FILE __stdout;       
-//定义_sys_exit()以避免使用半主机模式    
-void _sys_exit(int x) 
-{ 
-	x = x; 
-} 
-//重定义fputc函数 
-int fputc(int ch, FILE *f)
-{ 	
-	while((USART1->ISR&0X40)==0);//循环发送,直到发送完毕   
-	USART1->TDR = (u8) ch;  
-//		LL_USART_TransmitData8(USART1, ch);
-	return ch;
-}
 #endif /* end __GNUC__ */
 
 #if EN_USART1_RX   //如果使能了接收

@@ -14,8 +14,7 @@ int main(void)
 	uint8_t t = 0, state = 0;
 	uint16_t oldcnt = 0;
 	uint16_t applenth = 0;
-	
-	SCB->VTOR = FLASH_BASE | 0x3000;
+	SCB->VTOR = 0x4000;
 	
 	HAL_Init();
 	Stm32_Clock_Init(RCC_PLL_MUL9);
@@ -23,18 +22,16 @@ int main(void)
 	uart_init(115200);
 	led_init();
 	button_init();
-	printf("1111111111\r\n");
 	#if 1
-	while(1)
-	{
-		printf("APP程序运行中...\r\n");
-		delay_ms(1000);
-	}
+		while(1)
+		{
+			printf("APP程序运行中。。。\r\n");
+			delay_ms(1000);
+		}
 	#endif
-	
-#if 0
+		#if 0
 	while (1)
-  {
+	{
 		if (USART_RX_CNT)
 		{
 			if (oldcnt == USART_RX_CNT)

@@ -1,5 +1,7 @@
 #include "iap.h"
 #include "delay.h"
+#include "stm32f301x8.h"
+#include "stm32f3xx_ll_usart.h"
 #include "sys.h"
 #include "stmflash.h"
 
@@ -51,6 +53,20 @@ void iap_load_app(uint32_t appxaddr)
 	{
 		jump2app = (iapfun)*(vu32 *)(appxaddr + 4);
 		MSR_MSP(*(vu32 *)appxaddr);
+		/* 关闭中断，防止进入APP后进入中断
+			由于查找不到相应中断的服务函数
+			而死机
+		*/
+		for (int i = 0; i < 8; i++)
+		{
+			NVIC->ICER[i] = 0xFFFFFFFF;
+			NVIC->ICPR[i] = 0xFFFFFFFF;
+		}
+		HAL_RCC_DeInit();
+		SysTick->CTRL = 0;
+		SysTick->LOAD = 0;
+		SysTick->VAL = 0;
+		
 		jump2app();
 	}
 }

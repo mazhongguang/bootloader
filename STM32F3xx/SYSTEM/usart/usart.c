@@ -24,6 +24,8 @@
 ////////////////////////////////////////////////////////////////////////////////// 	  
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 //#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)	
+//
+UART_HandleTypeDef UART1_Handler; //UART句柄
 #if defined (__ARMCLIB_VERSION)  /* KEIL */
 #pragma import(__use_no_semihosting)             
 //标准库需要的支持函数                 
@@ -47,7 +49,7 @@ int fputc(int ch, FILE *f)
 	return ch;
 }
 #else
-int __write(int fd, char *pBuffer, int size)
+int _write(int fd, char *pBuffer, int size)
 {
 	int i = 0;
 
@@ -58,25 +60,13 @@ int __write(int fd, char *pBuffer, int size)
 
 	while (*pBuffer && (i < size))
 	{
-		while (LL_USART_IsActiveFlag_TXE(USART1) == SET);
+		while (LL_USART_IsActiveFlag_TC(USART1) != SET);
 		LL_USART_TransmitData8(USART1, *pBuffer);
-		if (*pBuffer == '\n')
-		{
-			while (LL_USART_IsActiveFlag_TXE(USART1) == SET);
-			LL_USART_TransmitData8(USART1, '\r');
-		}
 		i++;
 		pBuffer++;
 	}
 	return i;
-	/*for (int i = 0; i < size; i++)*/
-	/*{*/
-		/*while(LL_USART_IsActiveFlag_TXE(USART1) == SET);*/
-		/*LL_USART_TransmitData8(USART1, *pBuffer++);*/
-	/*}*/
-	/*return size;*/
 }
-
 #endif /* end __GNUC__ */
 
 #if EN_USART1_RX   //如果使能了接收
@@ -91,7 +81,7 @@ u16 USART_RX_STA=0;       //接收状态标记
 uint32_t USART_RX_CNT = 0; /* 接收的字节数 */
 
 u8 aRxBuffer[RXBUFFERSIZE];//HAL库使用的串口接收缓冲
-UART_HandleTypeDef UART1_Handler; //UART句柄
+/*UART_HandleTypeDef UART1_Handler; //UART句柄*/
 
 //初始化IO 串口1 
 //bound:波特率
